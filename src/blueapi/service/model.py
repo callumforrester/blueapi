@@ -1,6 +1,6 @@
-from typing import Any, Iterable, List, Optional
+from typing import Any, Iterable, List, Optional, TypeVar, get_type_hints
 
-from bluesky.protocols import HasName
+from bluesky.protocols import HasName, Movable
 from pydantic import Field
 
 from blueapi.core import BLUESKY_PROTOCOLS, Device, Plan
@@ -8,6 +8,14 @@ from blueapi.utils import BlueapiBaseModel
 from blueapi.worker import Worker, WorkerState
 
 _UNKNOWN_NAME = "UNKNOWN"
+
+
+T = TypeVar("T")
+
+
+class MovableModel(BlueapiBaseModel):
+    # TODO: Minimum, Maximum, EnumValues
+    type: str = Field(description="Python type that values may be of, float, int, etc.")
 
 
 class DeviceModel(BlueapiBaseModel):
@@ -19,11 +27,28 @@ class DeviceModel(BlueapiBaseModel):
     protocols: List[str] = Field(
         description="Protocols that a device conforms to, indicating its capabilities"
     )
+    movable_type: Optional[MovableModel] = Field(
+        description="Type of value device may be moved to. None if Device not Movable",
+        default=None,
+    )
 
     @classmethod
     def from_device(cls, device: Device) -> "DeviceModel":
         name = device.name if isinstance(device, HasName) else _UNKNOWN_NAME
-        return cls(name=name, protocols=list(_protocol_names(device)))
+        protocols = list(_protocol_names(device))
+
+        type = (
+            get_type_hints(device.set).get("return")
+            if isinstance(device, Movable)
+            else None
+        )
+        movable_model = None if type is None else MovableModel(type=type)
+
+        return cls(
+            name=name,
+            protocols=protocols,
+            movable_type=movable_model,
+        )
 
 
 def _protocol_names(device: Device) -> Iterable[str]:

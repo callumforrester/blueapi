@@ -118,15 +118,14 @@ def get_plan_by_name(name: str, handler: BlueskyHandler = Depends(get_handler)):
     return handler.get_plan(name)
 
 
-@app.get("/devices", response_model=DeviceResponse)
+@app.get("/devices", response_model=DeviceResponse, response_model_exclude_none=True)
 def get_devices(handler: BlueskyHandler = Depends(get_handler)):
     """Retrieve information about all available devices."""
     return DeviceResponse(devices=handler.devices)
 
 
 @app.get(
-    "/devices/{name}",
-    response_model=DeviceModel,
+    "/devices/{name}", response_model=DeviceModel, response_model_exclude_none=True
 )
 def get_device_by_name(name: str, handler: BlueskyHandler = Depends(get_handler)):
     """Retrieve information about a devices by its (unique) name."""
