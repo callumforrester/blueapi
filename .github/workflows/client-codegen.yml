@@ -1,0 +1,107 @@
+name: Client Codegen
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+  pull_request:
+    branches:
+      - main
+      - 'releases/**'
+
+jobs:
+  py-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Install OpenAPI Generator CLI
+        # todo error - this needs java 
+        run: npm install @openapitools/openapi-generator-cli -g
+
+      - name: Generate Client Code
+        run: openapi-generator-cli generate -i docs/user/reference/openapi.yml -g python -o /python-client
+
+      - name: Build sdist and wheel
+        run: cd /python-client && pipx run build
+
+      - name: Upload sdist and wheel as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: py-build
+          path: py-build
+
+  pypi-publish:
+    # upload to PyPI and make a release on every tag
+    needs: [py-build]
+
+    runs-on: ubuntu-latest
+    permissions:
+      # this permission is mandatory for trusted publishing To PyPI
+      id-token: write
+      # This permission allows the CI to create the release environment
+      contents: write
+    # Specify the GitHub Environment to publish to
+    environment: release
+
+    steps:
+      # download sdist and wheel from dist job
+      - uses: actions/download-artifact@v4.1.4
+
+      # publish to PyPI using trusted publishing
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1.8.4
+
+  js-dist:
+    runs-on: 'ubuntu-latest'
+      steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'  # Choose the Node.js version that suits your project
+
+      - name: Install OpenAPI Generator CLI
+        run: npm install @openapitools/openapi-generator-cli -g
+
+      - name: Generate TypeScript Fetch Client
+        run: openapi-generator-cli generate -i docs/user/reference/openapi.yml -g typescript-fetch -o /ts-fetch-client
+
+      # Optional: Install dependencies and build the TypeScript project
+      # This step assumes you have a package.json file and a build script
+      - name: Install Dependencies and Build
+        run: |
+          cd /ts-fetch-client
+          npm install
+          npm run build
+
+      # Optional: Commit and push the generated code to a specific branch
+      - name: Commit Generated Code
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add /ts-fetch-client
+          git commit -m "Generate TypeScript fetch client"
+          git push origin HEAD:branch-name-to-push-to
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '21.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
