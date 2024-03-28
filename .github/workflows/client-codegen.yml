@@ -24,8 +24,13 @@ jobs:
         with:
           python-version: "3.9"
 
+      - name: Install Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
       - name: Install OpenAPI Generator CLI
-        # todo error - this needs java 
         run: npm install @openapitools/openapi-generator-cli -g
 
       - name: Generate Client Code
