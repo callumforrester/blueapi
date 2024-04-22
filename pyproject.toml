@@ -7,7 +7,6 @@ name = "blueapi"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
@@ -19,7 +18,7 @@ dependencies = [
     "pyepics",
     "aioca",
     "pydantic<2.0",
-    "stomp.py",
+    "stomp-py",
     "aiohttp",
     "PyYAML",
     "click<8.1.4",
@@ -27,12 +26,12 @@ dependencies = [
     "uvicorn",
     "requests",
     "dls-bluesky-core",  #requires ophyd-async
-    "dls-dodal",
+    "dls-dodal<1.21",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.optional-dependencies]
 dev = [
