@@ -148,7 +148,7 @@ class TaskWorker(Worker[Task]):
         elif status == TaskStatusEnum.COMPLETE:
             return [task for task in self._tasks.values() if task.is_complete]
         else:
-            raise ValueError("Unknown status")
+            raise ValueError("Unknown status string")
 
     def _submit_trackable_task(self, trackable_task: TrackableTask) -> None:
         if self.state is not WorkerState.IDLE:

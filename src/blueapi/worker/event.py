@@ -100,7 +100,7 @@ class WorkerEvent(BlueapiBaseModel):
     """
 
     state: WorkerState
-    task_status: TaskStatusEnum = TaskStatusEnum.PENDING
+    task_status: TaskStatus | None = None
     errors: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 
