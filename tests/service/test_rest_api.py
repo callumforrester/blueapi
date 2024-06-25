@@ -110,7 +110,21 @@ def test_get_plan_with_device_reference(handler: Handler, client: TestClient) ->
                         "title": "Delay",
                     },
                     "detectors": {
-                        "items": {"type": "bluesky.protocols.Readable"},
+                        "items": {
+                            "type": "string",
+                            "target_type": "bluesky.protocols.Readable",
+                            "enum": [
+                                "sample_pressure",
+                                "x_err",
+                                "theta",
+                                "z",
+                                "y",
+                                "x",
+                                "current_det",
+                                "image_det",
+                                "sample_temperature",
+                            ],
+                        },
                         "title": "Detectors",
                         "type": "array",
                     },

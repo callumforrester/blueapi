@@ -201,9 +201,18 @@ class BlueskyContext:
                 def __modify_schema__(
                     cls, field_schema: dict[str, Any], field: ModelField | None
                 ):
+                    target_type = f"{target.__module__}.{target.__qualname__}"
                     if field:
                         field_schema.update(
-                            {"type": f"{target.__module__}.{target.__qualname__}"}
+                            {
+                                "type": "string",
+                                "enum": [
+                                    k
+                                    for k, v in self.devices.items()
+                                    if isinstance(v, target)
+                                ],
+                                "target_type": target_type,
+                            }
                         )
 
             self._reference_cache[target] = Reference
