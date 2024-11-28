@@ -23,9 +23,7 @@ from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import CoreSchema, core_schema
 
 from blueapi.config import EnvironmentConfig, SourceKind
-from blueapi.utils import BlueapiPlanModelConfig, load_module_all
-
-from .bluesky_types import (
+from blueapi.core.bluesky_types import (
     BLUESKY_PROTOCOLS,
     Device,
     HasName,
@@ -34,7 +32,8 @@ from .bluesky_types import (
     is_bluesky_compatible_device,
     is_bluesky_plan_generator,
 )
-from .device_lookup import find_component
+from blueapi.core.device_lookup import find_component
+from blueapi.utils import BlueapiPlanModelConfig, load_module_all
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ class BlueskyContext:
         Find a device in this context, allows for recursive search.
 
         Args:
-            addr (Union[str, List[str]]): Address of the device, examples:
+            addr (str | list[str]): Address of the device, examples:
                                           "motors", "motors.x"
 
         Returns:

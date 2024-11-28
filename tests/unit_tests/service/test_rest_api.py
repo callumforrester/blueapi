@@ -1,6 +1,7 @@
 import uuid
 from collections.abc import Iterator
 from dataclasses import dataclass
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -146,10 +147,7 @@ def test_get_non_existent_device_by_name(
 
 
 @patch("blueapi.service.interface.submit_task")
-@patch("blueapi.service.interface.get_plan")
-def test_create_task(
-    get_plan_mock: MagicMock, submit_task_mock: MagicMock, client: TestClient
-) -> None:
+def test_create_task(submit_task_mock: MagicMock, client: TestClient) -> None:
     task = Task(name="count", params={"detectors": ["x"]})
     task_id = str(uuid.uuid4())
 
@@ -171,14 +169,20 @@ def test_create_task_validation_error(
 
     plan = Plan(name="my-plan", model=MyModel)
     get_plan_mock.return_value = PlanModel.from_plan(plan)
-    submit_task_mock.side_effect = ValidationError.from_exception_data(
-        title="ValueError",
-        line_errors=[
-            InitErrorDetails(
-                type="missing", loc=("id",), msg="value is required for Identifier"
-            )  # type: ignore
-        ],
-    )
+
+    def raise_validation_error(bar: Any):
+        raise ValidationError.from_exception_data(
+            title="ValueError",
+            line_errors=[
+                InitErrorDetails(
+                    input=bar,
+                    type="missing",
+                    loc=("id",),
+                )
+            ],
+        )
+
+    submit_task_mock.side_effect = raise_validation_error
     response = client.post("/tasks", json={"name": "my-plan"})
     assert response.status_code == 422
     assert response.json() == {

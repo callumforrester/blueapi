@@ -1,7 +1,6 @@
 import asyncio
 from typing import Any, cast
 
-# Based on https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option  # noqa: E501
 import pytest
 from bluesky._vendor.super_state_machine.errors import TransitionError
 from bluesky.run_engine import RunEngine
@@ -12,7 +11,7 @@ from opentelemetry.trace import get_tracer_provider
 
 
 @pytest.fixture(scope="function")
-def RE(request):
+def RE(request: pytest.FixtureRequest) -> RunEngine:
     loop = asyncio.new_event_loop()
     loop.set_debug(True)
     RE = RunEngine({}, call_returns_result=True, loop=loop)

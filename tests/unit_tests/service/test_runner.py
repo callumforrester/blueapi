@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from typing import Any, Generic, TypeVar
 from unittest import mock
 from unittest.mock import MagicMock, patch
@@ -20,17 +21,17 @@ from blueapi.service.runner import (
 
 
 @pytest.fixture
-def local_runner():
+def local_runner() -> WorkerDispatcher:
     return WorkerDispatcher(use_subprocess=False)
 
 
 @pytest.fixture
-def runner():
+def runner() -> WorkerDispatcher:
     return WorkerDispatcher()
 
 
 @pytest.fixture
-def started_runner(runner: WorkerDispatcher):
+def started_runner(runner: WorkerDispatcher) -> Generator[WorkerDispatcher]:
     runner.start()
     yield runner
     runner.stop()

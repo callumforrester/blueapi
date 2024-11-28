@@ -32,8 +32,7 @@ from blueapi.core import (
 from blueapi.core.bluesky_event_loop import configure_bluesky_event_loop
 from blueapi.utils.base_model import BlueapiBaseModel
 from blueapi.utils.thread_exception import handle_all_exceptions
-
-from .event import (
+from blueapi.worker.event import (
     ProgressEvent,
     RawRunEngineState,
     StatusView,
@@ -42,8 +41,8 @@ from .event import (
     WorkerEvent,
     WorkerState,
 )
-from .task import Task
-from .worker_errors import WorkerAlreadyStartedError, WorkerBusyError
+from blueapi.worker.task import Task
+from blueapi.worker.worker_errors import WorkerAlreadyStartedError, WorkerBusyError
 
 LOGGER = logging.getLogger(__name__)
 TRACER = get_tracer("task_worker")
@@ -94,7 +93,7 @@ class TaskWorker:
     # but as a box in which to put the "current" task and nothing else
     # So the calling thread can only ever submit one plan at a time.
 
-    _task_channel: Queue  # type: ignore
+    _task_channel: Queue
     _current: TrackableTask | None
     _status_lock: RLock
     _status_snapshot: dict[str, StatusView]
@@ -482,7 +481,7 @@ class TaskWorker:
                 del self._status_snapshot[status_uuid]
                 self._completed_statuses.add(status_uuid)
 
-            status.add_callback(on_complete)  # type: ignore
+            status.add_callback(on_complete)
 
     def _on_status_event(
         self,
