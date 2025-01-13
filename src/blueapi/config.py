@@ -41,6 +41,15 @@ class StompConfig(BaseModel):
     auth: BasicAuthentication | None = None
 
 
+class TiledConfig(BaseModel):
+    """
+    Config for connecting to a tiled instance
+    """
+
+    host: str
+    port: int
+
+
 class WorkerEventConfig(BlueapiBaseModel):
     """
     Config for event broadcasting via the message bus
@@ -111,7 +120,9 @@ class OIDCConfig(BlueapiBaseModel):
         description="URL to fetch OIDC config from the provider"
     )
     client_id: str = Field(description="Client ID")
-    client_audience: str = Field(description="Client Audience(s)", default="blueapi")
+    client_audience: str | list[str] | None = Field(
+        description="Client Audience(s)", default="blueapi"
+    )
 
     @cached_property
     def _config_from_oidc_url(self) -> dict[str, Any]:
@@ -160,6 +171,7 @@ class ApplicationConfig(BlueapiBaseModel):
     """
 
     stomp: StompConfig | None = None
+    tiled: TiledConfig | None = None
     env: EnvironmentConfig = Field(default_factory=EnvironmentConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     api: RestConfig = Field(default_factory=RestConfig)
