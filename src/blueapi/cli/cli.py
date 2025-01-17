@@ -346,6 +346,7 @@ def env(
         print("Environment is initialized")
     else:
         status = client.get_environment()
+
     print(status)
 
 
